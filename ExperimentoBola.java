@@ -26,7 +26,8 @@ public class ExperimentoBola extends Application
     private int velocidadPlataforma;
     private static int RADIO = 20;
     private int tiempoEnSegundos;
-
+    private int eliminados = 0 ;
+    
     public static void main(String[] args){
         launch(args);
     }
@@ -34,41 +35,39 @@ public class ExperimentoBola extends Application
     @Override
     public void start(Stage escenario)
     {
+        int ANCHO_ESCENA = 500;
+        int ALTO_ESCENA = 700;
+
         Group contenedor = new Group();
 
         velocidadEnX = 1;
         velocidadEnY = 1;
         tiempoEnSegundos = 70;
 
-        Circle circulo = new Circle();
-        circulo.setFill(Color.RED);  
-        circulo.setRadius(RADIO);
-
         Rectangle plataforma = new Rectangle();
-        plataforma.setWidth(50);
+        plataforma.setWidth(90);
         plataforma.setHeight(5);
         plataforma.setTranslateX(225);
-        plataforma.setTranslateY(480);
+        plataforma.setTranslateY(ALTO_ESCENA -20);
         plataforma.setFill(Color.BLUE);
         contenedor.getChildren().add(plataforma);
-
         velocidadPlataforma = 1;
 
         Random aleatorio = new Random();
 
-        circulo.setCenterX(20 + aleatorio.nextInt(500 - 40));
-        circulo.setCenterY(50);
-        contenedor.getChildren().add(circulo);
-
         Label tiempoPasado = new Label("0");
         contenedor.getChildren().add(tiempoPasado);
 
-        int ANCHO_ESCENA = 500;
-        int ALTO_ESCENA = 500;
         Scene escena = new Scene(contenedor, ANCHO_ESCENA, ALTO_ESCENA);
         escenario.setScene(escena);
         escenario.show();
 
+        //MUESTRA EL Nº DE  BARRITAS QUE SE VAN ELIMINANDO,
+        Label barritasEliminadas = new Label();
+        barritasEliminadas.setTranslateX(2);
+        barritasEliminadas.setTranslateY(20);
+        contenedor.getChildren().add(barritasEliminadas);
+        
         ////////////////////////////////////////*****************************************************************************
 
         ArrayList<Rectangle> rectangulos = new ArrayList<>();
@@ -76,14 +75,14 @@ public class ExperimentoBola extends Application
         int EJE_Y = 50;//-------------POSICIÓN ININCIAL DE LA 1º FILA DE BARRITAS EN EL EJE Y.
         int NUM_FILAS_EN_Y = 4;// ---ES EL Nº DE FILAS EN EL EJE Y.
         int BARRITAS_EN_Y = 20;
-        int longitudBarrita = aleatorio.nextInt(60) +70;//-- CADA BARRITA TIENE UNA LONGITUD ALEATORIA.
+        int longitudBarrita = aleatorio.nextInt(160) +70;//-- CADA BARRITA TIENE UNA LONGITUD ALEATORIA.
         int val = 0;
         while(val < BARRITAS_EN_Y){
-            int largoR = 70; //largo de la barra; aleatorio.
+            int largoR = aleatorio.nextInt(60) +60; //largo de la barra; aleatorio.
             int coorX = aleatorio.nextInt(ANCHO_ESCENA - (longitudBarrita *2)) +longitudBarrita; //coordenada X de la barra, aleatoria.
             int coorY = aleatorio.nextInt(ALTO_ESCENA /2) + ALTO_BARRITAS;
             Color color = new Color(aleatorio.nextDouble(), aleatorio.nextDouble(), aleatorio.nextDouble(), aleatorio.nextDouble());
-
+            
             Rectangle rectangulo = new Rectangle();
 
             if(rectangulos.size() == 0){                     
@@ -97,13 +96,14 @@ public class ExperimentoBola extends Application
                 rectangulo.setVisible(true);
 
                 rectangulos.add(rectangulo);
-
             }
             else{ 
                 while(rectangulos.size() < BARRITAS_EN_Y){
                     boolean esValido = true;
                     boolean add = false;
                     while(esValido == true && add == false){
+                        longitudBarrita = aleatorio.nextInt(160) +70;
+                        Color color2 = new Color(aleatorio.nextDouble(), aleatorio.nextDouble(), aleatorio.nextDouble(), aleatorio.nextDouble());
                         Rectangle rectangulo2 = new Rectangle();
                         coorX = aleatorio.nextInt(ANCHO_ESCENA - (largoR *2)) +largoR;
                         coorY = aleatorio.nextInt(ALTO_ESCENA /2) + ALTO_BARRITAS;
@@ -112,10 +112,9 @@ public class ExperimentoBola extends Application
                         rectangulo2.setWidth(longitudBarrita);
                         rectangulo2.setHeight(ALTO_BARRITAS);
                         rectangulo2.setStroke(Color.BLACK);
-                        rectangulo2.setFill(color);
+                        rectangulo2.setFill(color2);
 
                         rectangulo2.setVisible(true);
-
 
                         for(int i = 0; i < rectangulos.size(); i ++){
                             Shape c = Shape.intersect(rectangulos.get(i), rectangulo2);
@@ -141,6 +140,13 @@ public class ExperimentoBola extends Application
             }
             val ++;//Shape c = Shape.intersect(rectangulo, rectangulo2);
         }       //////////////////////////////////////////////////////*********************************************************
+
+        Circle circulo = new Circle();
+        circulo.setFill(Color.RED);  
+        circulo.setRadius(RADIO);
+        circulo.setCenterX(20 + aleatorio.nextInt(500 - 40));
+        circulo.setCenterY(50);
+        contenedor.getChildren().add(circulo);
 
         Timeline timeline = new Timeline();
         KeyFrame keyframe = new KeyFrame(Duration.seconds(0.01), event -> {
@@ -190,6 +196,21 @@ public class ExperimentoBola extends Application
                         timeline.stop();
                     }
 
+                    /////////////////////////////// PARA ELIMINAR BARRITAS AL COLISIONAR CON LA BOLA.
+                    
+                    for(int i = 0; i < rectangulos.size(); i ++){
+                        Shape c = Shape.intersect(rectangulos.get(i), circulo);
+                        if(c.getBoundsInParent().getWidth() != -1){
+                            rectangulos.get(i).setFill(Color.WHITE);
+                            rectangulos.get(i).setStroke(Color.WHITE);
+                            rectangulos.remove(i);
+                            velocidadEnY = -velocidadEnY;
+                            eliminados ++;
+
+                            barritasEliminadas.setText("Barritas eliminadas; " +eliminados);
+                           // contenedor.getChildren().add(barritasEliminadas);
+                        }
+                    }
                 });  
         timeline.getKeyFrames().add(keyframe);
 
