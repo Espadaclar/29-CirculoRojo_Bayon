@@ -16,9 +16,9 @@ import javafx.scene.input.KeyCode;
 import java.util.Timer;
 import java.util.TimerTask;
 
-
 import java.util.ArrayList;
 import java.util.Random;
+import javafx.scene.shape.Shape;
 public class ExperimentoBola extends Application
 {
     private int velocidadEnX;
@@ -59,106 +59,138 @@ public class ExperimentoBola extends Application
         circulo.setCenterX(20 + aleatorio.nextInt(500 - 40));
         circulo.setCenterY(50);
         contenedor.getChildren().add(circulo);
-        
+
         Label tiempoPasado = new Label("0");
         contenedor.getChildren().add(tiempoPasado);
-        
+
         int ANCHO_ESCENA = 500;
         int ALTO_ESCENA = 500;
         Scene escena = new Scene(contenedor, ANCHO_ESCENA, ALTO_ESCENA);
         escenario.setScene(escena);
         escenario.show();
-        
-        
+
         ////////////////////////////////////////*****************************************************************************
-        
+
         ArrayList<Rectangle> rectangulos = new ArrayList<>();
-        
-        int ALTO_BARRITAS = 25;
+        int ALTO_BARRITAS = 15;
         int EJE_Y = 50;//-------------POSICIÓN ININCIAL DE LA 1º FILA DE BARRITAS EN EL EJE Y.
         int NUM_FILAS_EN_Y = 4;// ---ES EL Nº DE FILAS EN EL EJE Y.
-        int BARRITAS_EN_Y = 4; 
-        
+        int BARRITAS_EN_Y = 20;
+        int longitudBarrita = aleatorio.nextInt(60) +70;//-- CADA BARRITA TIENE UNA LONGITUD ALEATORIA.
         int val = 0;
-            while(val < BARRITAS_EN_Y){
-                
-                int largoR = 70; //largo de la barra; aleatorio.
-                
-                int coorX = aleatorio.nextInt(ANCHO_ESCENA - (largoR *2)) +largoR; //coordenada X de la barra, aleatoria.
-                int coorY = aleatorio.nextInt(ALTO_ESCENA /2) - ALTO_BARRITAS;
-                boolean encontrado = false;
-                // Random aleatorio = new Random();//-
-                    Color color = new Color(aleatorio.nextDouble(), aleatorio.nextDouble(), aleatorio.nextDouble(), aleatorio.nextDouble());
-                    double barritas = aleatorio.nextInt(60) +70;//-- CADA BARRITA TIENE UNA LONGITUD ALEATORIA.
-                    
-                    Rectangle rectangulo2 = new Rectangle();
-                    
+        while(val < BARRITAS_EN_Y){
+            int largoR = 70; //largo de la barra; aleatorio.
+            int coorX = aleatorio.nextInt(ANCHO_ESCENA - (longitudBarrita *2)) +longitudBarrita; //coordenada X de la barra, aleatoria.
+            int coorY = aleatorio.nextInt(ALTO_ESCENA /2) + ALTO_BARRITAS;
+            Color color = new Color(aleatorio.nextDouble(), aleatorio.nextDouble(), aleatorio.nextDouble(), aleatorio.nextDouble());
 
-                    rectangulo2.setLayoutX(coorX);
-                    rectangulo2.setLayoutY(coorY);
-                    rectangulo2.setWidth(barritas);//LONGITUD ALEATORIA DE LAS BARRITAS, EXCEPTO LA DE LA ÚLTIMA BARRITA.
-                    rectangulo2.setHeight(ALTO_BARRITAS);
-                    contenedor.getChildren().add(rectangulo2);
-                    rectangulo2.setStroke(Color.BLACK);
-                    rectangulo2.setFill(color);
-                  
-                    rectangulos.add(rectangulo2);
-                    
-                    val ++;
+            Rectangle rectangulo = new Rectangle();
+
+            if(rectangulos.size() == 0){                     
+                rectangulo.setLayoutX(coorX);
+                rectangulo.setLayoutY(coorY);
+                rectangulo.setWidth(longitudBarrita);//LONGITUD ALEATORIA DE LAS BARRITAS, EXCEPTO LA DE LA ÚLTIMA BARRITA.
+                rectangulo.setHeight(ALTO_BARRITAS);
+                contenedor.getChildren().add(rectangulo);
+                rectangulo.setStroke(Color.BLACK);
+                rectangulo.setFill(Color.YELLOW);
+                rectangulo.setVisible(true);
+
+                rectangulos.add(rectangulo);
+
             }
-            
-        //////////////////////////////////////////////////////*********************************************************
-        
-        
+            else{ 
+                while(rectangulos.size() < BARRITAS_EN_Y){
+                    boolean esValido = true;
+                    boolean add = false;
+                    while(esValido == true && add == false){
+                        Rectangle rectangulo2 = new Rectangle();
+                        coorX = aleatorio.nextInt(ANCHO_ESCENA - (largoR *2)) +largoR;
+                        coorY = aleatorio.nextInt(ALTO_ESCENA /2) + ALTO_BARRITAS;
+                        rectangulo2.setLayoutX(coorX);
+                        rectangulo2.setLayoutY(coorY);
+                        rectangulo2.setWidth(longitudBarrita);
+                        rectangulo2.setHeight(ALTO_BARRITAS);
+                        rectangulo2.setStroke(Color.BLACK);
+                        rectangulo2.setFill(color);
+
+                        rectangulo2.setVisible(true);
+
+
+                        for(int i = 0; i < rectangulos.size(); i ++){
+                            Shape c = Shape.intersect(rectangulos.get(i), rectangulo2);
+                            if(c.getBoundsInParent().getWidth() != -1){
+                                esValido = false;
+                            }
+
+                        }
+                        if (esValido == true ){
+                            contenedor.getChildren().add(rectangulo2);
+                            rectangulos.add(rectangulo2);
+                            add = true;
+                        }
+                    }
+
+                    // Lo comparamos contra todos los existentes
+                    // Al final de TODAS las comparaciones estamos en disposicion de saber si el rectangulo es valido
+                    // Si es valido lo añadimos
+                    // Si no es valido tenemos que elegir un nuevo rect
+                    val ++;
+                }
+
+            }
+            val ++;//Shape c = Shape.intersect(rectangulo, rectangulo2);
+        }       //////////////////////////////////////////////////////*********************************************************
+
         Timeline timeline = new Timeline();
         KeyFrame keyframe = new KeyFrame(Duration.seconds(0.01), event -> {
 
-                        // Controlamos si la bola rebota a ziquierda o derecha
-                        if (circulo.getBoundsInParent().getMinX() <= 0 ||
-                        circulo.getBoundsInParent().getMaxX() >= escena.getWidth()) {
-                            velocidadEnX = -velocidadEnX;                              
-                        }
+                    // Controlamos si la bola rebota a ziquierda o derecha
+                    if (circulo.getBoundsInParent().getMinX() <= 0 ||
+                    circulo.getBoundsInParent().getMaxX() >= escena.getWidth()) {
+                        velocidadEnX = -velocidadEnX;                              
+                    }
 
-                        // Conrolamos si la bola rebota arriba y abajo
-                        if (circulo.getBoundsInParent().getMinY() <= 0) {
+                    // Conrolamos si la bola rebota arriba y abajo
+                    if (circulo.getBoundsInParent().getMinY() <= 0) {
+                        velocidadEnY = -velocidadEnY;
+                    }
+
+                    if (circulo.getBoundsInParent().getMaxY() == plataforma.getBoundsInParent().getMinY()) {
+                        double centroEnXDeLaBola = circulo.getBoundsInParent().getMinX() + RADIO;
+                        double minEnXDeLaPlataforma = plataforma.getBoundsInParent().getMinX();
+                        double maxEnXDeLaPlataforma = plataforma.getBoundsInParent().getMaxX();
+                        if ((centroEnXDeLaBola >= minEnXDeLaPlataforma) &&
+                        (centroEnXDeLaBola <= maxEnXDeLaPlataforma)) {
+                            //La bola esta sobre la plataforma
                             velocidadEnY = -velocidadEnY;
                         }
+                    }
 
-                        if (circulo.getBoundsInParent().getMaxY() == plataforma.getBoundsInParent().getMinY()) {
-                            double centroEnXDeLaBola = circulo.getBoundsInParent().getMinX() + RADIO;
-                            double minEnXDeLaPlataforma = plataforma.getBoundsInParent().getMinX();
-                            double maxEnXDeLaPlataforma = plataforma.getBoundsInParent().getMaxX();
-                            if ((centroEnXDeLaBola >= minEnXDeLaPlataforma) &&
-                            (centroEnXDeLaBola <= maxEnXDeLaPlataforma)) {
-                                //La bola esta sobre la plataforma
-                                velocidadEnY = -velocidadEnY;
-                            }
-                        }
+                    circulo.setTranslateX(circulo.getTranslateX() + velocidadEnX);
+                    circulo.setTranslateY(circulo.getTranslateY() + velocidadEnY);
 
-                        circulo.setTranslateX(circulo.getTranslateX() + velocidadEnX);
-                        circulo.setTranslateY(circulo.getTranslateY() + velocidadEnY);
+                    plataforma.setTranslateX(plataforma.getTranslateX() + velocidadPlataforma);
+                    if (plataforma.getBoundsInParent().getMinX() == 0  || 
+                    plataforma.getBoundsInParent().getMaxX() == escena.getWidth()) {
+                        velocidadPlataforma = 0;
+                    }
 
-                        plataforma.setTranslateX(plataforma.getTranslateX() + velocidadPlataforma);
-                        if (plataforma.getBoundsInParent().getMinX() == 0  || 
-                        plataforma.getBoundsInParent().getMaxX() == escena.getWidth()) {
-                            velocidadPlataforma = 0;
-                        }
-                        
-                        // Actualizamos la etiqueta del tiempo
-                        int minutos = tiempoEnSegundos / 60;
-                        int segundos = tiempoEnSegundos % 60;
-                        tiempoPasado.setText(minutos + ":" + segundos);                        
+                    // Actualizamos la etiqueta del tiempo
+                    int minutos = tiempoEnSegundos / 60;
+                    int segundos = tiempoEnSegundos % 60;
+                    tiempoPasado.setText(minutos + ":" + segundos);                        
 
-                        // Comrpobamos si el juego debe detenerse
-                        if (circulo.getBoundsInParent().getMinY() > escena.getHeight()) {
-                            Label mensajeGameOver = new Label("Game over");
-                            mensajeGameOver.setTranslateX(escena.getWidth() / 2);
-                            mensajeGameOver.setTranslateY(escena.getHeight() / 2);
-                            contenedor.getChildren().add(mensajeGameOver);
-                            timeline.stop();
-                        }
-                        
-                    });  
+                    // Comrpobamos si el juego debe detenerse
+                    if (circulo.getBoundsInParent().getMinY() > escena.getHeight()) {
+                        Label mensajeGameOver = new Label("Game over");
+                        mensajeGameOver.setTranslateX(escena.getWidth() / 2);
+                        mensajeGameOver.setTranslateY(escena.getHeight() / 2);
+                        contenedor.getChildren().add(mensajeGameOver);
+                        timeline.stop();
+                    }
+
+                });  
         timeline.getKeyFrames().add(keyframe);
 
         timeline.setCycleCount(Timeline.INDEFINITE);
@@ -176,19 +208,15 @@ public class ExperimentoBola extends Application
             });
 
         TimerTask tarea = new TimerTask() {
-            @Override
-            public void run() {
-                tiempoEnSegundos++;
-            }                        
-        };
+                @Override
+                public void run() {
+                    tiempoEnSegundos++;
+                }                        
+            };
         Timer timer = new Timer();
         timer.schedule(tarea, 0, 1000);
-            
+
     }
 
 }
-
-
-
-
 
