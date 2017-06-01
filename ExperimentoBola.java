@@ -17,7 +17,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 
-
+import java.util.ArrayList;
+import java.util.Random;
 public class ExperimentoBola extends Application
 {
     private int velocidadEnX;
@@ -61,11 +62,54 @@ public class ExperimentoBola extends Application
         
         Label tiempoPasado = new Label("0");
         contenedor.getChildren().add(tiempoPasado);
-
-        Scene escena = new Scene(contenedor, 500, 500);
+        
+        int ANCHO_ESCENA = 500;
+        int ALTO_ESCENA = 500;
+        Scene escena = new Scene(contenedor, ANCHO_ESCENA, ALTO_ESCENA);
         escenario.setScene(escena);
         escenario.show();
+        
+        
+        ////////////////////////////////////////*****************************************************************************
+        
+        ArrayList<Rectangle> rectangulos = new ArrayList<>();
+        
+        int ALTO_BARRITAS = 25;
+        int EJE_Y = 50;//-------------POSICIÓN ININCIAL DE LA 1º FILA DE BARRITAS EN EL EJE Y.
+        int NUM_FILAS_EN_Y = 4;// ---ES EL Nº DE FILAS EN EL EJE Y.
+        int BARRITAS_EN_Y = 4; 
+        
+        int val = 0;
+            while(val < BARRITAS_EN_Y){
+                
+                int largoR = 70; //largo de la barra; aleatorio.
+                
+                int coorX = aleatorio.nextInt(ANCHO_ESCENA - (largoR *2)) +largoR; //coordenada X de la barra, aleatoria.
+                int coorY = aleatorio.nextInt(ALTO_ESCENA /2) - ALTO_BARRITAS;
+                boolean encontrado = false;
+                // Random aleatorio = new Random();//-
+                    Color color = new Color(aleatorio.nextDouble(), aleatorio.nextDouble(), aleatorio.nextDouble(), aleatorio.nextDouble());
+                    double barritas = aleatorio.nextInt(60) +70;//-- CADA BARRITA TIENE UNA LONGITUD ALEATORIA.
+                    
+                    Rectangle rectangulo2 = new Rectangle();
+                    
 
+                    rectangulo2.setLayoutX(coorX);
+                    rectangulo2.setLayoutY(coorY);
+                    rectangulo2.setWidth(barritas);//LONGITUD ALEATORIA DE LAS BARRITAS, EXCEPTO LA DE LA ÚLTIMA BARRITA.
+                    rectangulo2.setHeight(ALTO_BARRITAS);
+                    contenedor.getChildren().add(rectangulo2);
+                    rectangulo2.setStroke(Color.BLACK);
+                    rectangulo2.setFill(color);
+                  
+                    rectangulos.add(rectangulo2);
+                    
+                    val ++;
+            }
+            
+        //////////////////////////////////////////////////////*********************************************************
+        
+        
         Timeline timeline = new Timeline();
         KeyFrame keyframe = new KeyFrame(Duration.seconds(0.01), event -> {
 
