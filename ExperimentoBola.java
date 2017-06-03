@@ -24,10 +24,10 @@ public class ExperimentoBola extends Application
     private int velocidadEnX;
     private int velocidadEnY;
     private int velocidadPlataforma;
-    private static int RADIO = 20;
+    private static int RADIO = 10;
     private int tiempoEnSegundos;
     private int eliminados = 0 ;
-    
+
     public static void main(String[] args){
         launch(args);
     }
@@ -67,11 +67,11 @@ public class ExperimentoBola extends Application
         barritasEliminadas.setTranslateX(2);
         barritasEliminadas.setTranslateY(20);
         contenedor.getChildren().add(barritasEliminadas);
-        
+
         ////////////////////////////////////////*****************************************************************************
 
         ArrayList<Rectangle> rectangulos = new ArrayList<>();
-        int ALTO_BARRITAS = 15;
+        int ALTO_BARRITAS = 20;
         int EJE_Y = 50;//-------------POSICIÓN ININCIAL DE LA 1º FILA DE BARRITAS EN EL EJE Y.
         int NUM_FILAS_EN_Y = 4;// ---ES EL Nº DE FILAS EN EL EJE Y.
         int BARRITAS_EN_Y = 20;
@@ -82,9 +82,8 @@ public class ExperimentoBola extends Application
             int coorX = aleatorio.nextInt(ANCHO_ESCENA - (longitudBarrita *2)) +longitudBarrita; //coordenada X de la barra, aleatoria.
             int coorY = aleatorio.nextInt(ALTO_ESCENA /2) + ALTO_BARRITAS;
             Color color = new Color(aleatorio.nextDouble(), aleatorio.nextDouble(), aleatorio.nextDouble(), aleatorio.nextDouble());
-            
-            Rectangle rectangulo = new Rectangle();
 
+            Rectangle rectangulo = new Rectangle();
             if(rectangulos.size() == 0){                     
                 rectangulo.setLayoutX(coorX);
                 rectangulo.setLayoutY(coorY);
@@ -197,20 +196,51 @@ public class ExperimentoBola extends Application
                     }
 
                     /////////////////////////////// PARA ELIMINAR BARRITAS AL COLISIONAR CON LA BOLA.
-                    
-                    for(int i = 0; i < rectangulos.size(); i ++){
+
+                    for(int i = 0; i < rectangulos.size(); i ++ ){
                         Shape c = Shape.intersect(rectangulos.get(i), circulo);
+
+                        //COORDENADAS LATERALES DE CADA BARRITA Y DE LA BOLA.
+                        double longitud_Barrita = rectangulos.get(i).getWidth();
+                        double minimoDe_X_Barrita =  rectangulos.get(i).getBoundsInParent().getMinX();
+                        double maximo_X_Barrita =  minimoDe_X_Barrita + longitud_Barrita;
+                        double minimoDe_Y_Barrita = rectangulos.get(i).getBoundsInParent().getMinY();
+                        double maximoDe_Y_Barrita = rectangulos.get(i).getBoundsInParent().getMaxY();
+
+                        double maximoDe_X_Bolita = circulo.getBoundsInParent().getMaxX() -0.5;
+                        double minimoDe_X_Bolita =  circulo.getBoundsInParent().getMinX() -0.5;
+                        double maximoDe_Y_Bolita = circulo.getBoundsInParent().getMaxY() ;
+                        double minimoDe_Y_Bolita = circulo.getBoundsInParent().getMinY() ;
+
                         if(c.getBoundsInParent().getWidth() != -1){
                             rectangulos.get(i).setFill(Color.WHITE);
                             rectangulos.get(i).setStroke(Color.WHITE);
                             rectangulos.remove(i);
-                            velocidadEnY = -velocidadEnY;
-                            eliminados ++;
 
+                            if( (maximoDe_X_Bolita ) == minimoDe_X_Barrita && maximoDe_Y_Bolita >= minimoDe_Y_Barrita &&
+                            minimoDe_Y_Bolita <= maximoDe_Y_Barrita ){
+                                velocidadEnX = -velocidadEnX;                                  
+                                eliminados ++;
+                            }
+                            else if( (maximoDe_X_Bolita +1) == minimoDe_X_Barrita && maximoDe_Y_Bolita >= minimoDe_Y_Barrita &&
+                            minimoDe_Y_Bolita <= maximoDe_Y_Barrita ){
+                                velocidadEnX = -velocidadEnX;                                  
+                                eliminados ++;
+                            }
+                            else if( (minimoDe_X_Bolita ) == (minimoDe_X_Barrita + longitud_Barrita)
+                            && maximoDe_Y_Bolita >= minimoDe_Y_Barrita &&
+                            minimoDe_Y_Bolita <= maximoDe_Y_Barrita){
+                                velocidadEnX = -velocidadEnX;
+                                eliminados ++;
+                            }
+                            else{
+                                velocidadEnY = -velocidadEnY;
+                                eliminados ++;
+                            }
                             barritasEliminadas.setText("Barritas eliminadas; " +eliminados);
-                           // contenedor.getChildren().add(barritasEliminadas);
                         }
                     }
+
                 });  
         timeline.getKeyFrames().add(keyframe);
 
